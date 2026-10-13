@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WebSocket Echo</title>
+</head>
+<body>
+  <h1>WebSocket Echo</h1>
+
+  <input type="text" id="message-input" placeholder="Type a message" />
+  <button id="send-button">Send</button>
+
+  <ul id="messages"></ul>
+
+  <script>
+    const input = document.getElementById("message-input");
+    const button = document.getElementById("send-button");
+    const messages = document.getElementById("messages");
+
+    function addMessage(text) {
+      const li = document.createElement("li");
+      li.textContent = text;
+      messages.appendChild(li);
+    }
+
+    const socket = new WebSocket("ws://127.0.0.1:8000/ws");
+
+    socket.onopen = () => addMessage("Connected");
+    socket.onmessage = (event) => addMessage(event.data);
+    socket.onclose = () => addMessage("Disconnected");
+    socket.onerror = () => addMessage("Connection error");
+
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text || socket.readyState !== WebSocket.OPEN) return;
+      socket.send(text);
+      input.value = "";
+    }
+
+    button.addEventListener("click", sendMessage);
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") sendMessage();
+    });
+  </script>
+</body>
+</html>
